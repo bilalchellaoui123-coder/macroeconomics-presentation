@@ -1,0 +1,9 @@
+# Backups
+*.approved
+*.backup*
+*.user_pasted
+
+# Build tools
+node_modules/
+css/
+js/

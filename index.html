@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le dirham marocain : fonctionnement et évolution</title>
+    <meta name="description" content="Présentation universitaire sur le régime de change du dirham marocain.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #060d1f;
+            --bg-card: #0c1a3a;
+            --bg-card-hover: #112248;
+            --gold-100: #fef9c3;
+            --gold-200: #fef08a;
+            --gold-300: #fde047;
+            --gold-400: #facc15;
+            --gold-500: #eab308;
+            --gold-600: #ca8a04;
+            --blue-500: #3b82f6;
+            --blue-700: #1d4ed8;
+            --green-400: #4ade80;
+            --green-900: rgba(22, 101, 52, 0.3);
+            --red-400: #f87171;
+            --red-900: rgba(127, 29, 29, 0.3);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --glass-bg: rgba(12, 26, 58, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-hover: rgba(234, 179, 8, 0.35);
+            --transition-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            background: var(--bg-deep);
+        }
+
+        /* ===== FLOATING MONEY BACKGROUND ===== */
+        #money-bg {
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 1; overflow: hidden;
+        }
+        .money-item {
+            position: absolute;
+            font-size: 1.8rem;
+            opacity: 0;
+            animation: floatMoney linear infinite;
+            user-select: none;
+            will-change: transform, opacity;
+            color: rgba(234, 179, 8, 0.45);
+        }
+        @keyframes floatMoney {
+            0% { transform: translateY(110vh) translateX(0) rotate(0deg) scale(0.7); opacity: 0; }
+            8% { opacity: 0.4; }
+            50% { transform: translateY(50vh) translateX(var(--drift, 30px)) rotate(180deg) scale(1); }
+            85% { opacity: 0.4; }
+            100% { transform: translateY(-10vh) translateX(calc(var(--drift, 30px) * -0.5)) rotate(360deg) scale(1.1); opacity: 0; }
+        }
+
+        /* Ambient glow orbs */
+        .glow-orb {
+            position: fixed; border-radius: 50%; filter: blur(120px);
+            pointer-events: none; z-index: 0;
+            animation: orbPulse 8s ease-in-out infinite alternate;
+        }
+        .glow-orb-1 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(234,179,8,0.08) 0%, transparent 70%);
+            top: -100px; right: -100px;
+        }
+        .glow-orb-2 {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+            bottom: -150px; left: -150px;
+            animation-delay: -4s;
+        }
+        @keyframes orbPulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* ===== SLIDE ENGINE ===== */
+        #presentation {
+            position: relative; width: 100vw; height: 100vh; z-index: 2;
+        }
+        .slide {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            padding: 3rem 8%;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.6s var(--transition-smooth),
+                        transform 0.6s var(--transition-smooth),
+                        filter 0.6s var(--transition-smooth);
+            transform: translateY(30px) scale(0.98);
+            filter: blur(6px);
+        }
+        .slide.active {
+            opacity: 1; pointer-events: auto;
+            transform: translateY(0) scale(1);
+            filter: blur(0px);
+        }
+        .slide.exit-up {
+            opacity: 0;
+            transform: translateY(-40px) scale(0.98);
+            filter: blur(6px);
+        }
+
+        /* Stagger animations with varied directions */
+        .anim {
+            opacity: 0; transform: translateY(25px);
+            transition: opacity 0.6s var(--transition-smooth), transform 0.6s var(--transition-smooth);
+        }
+        .anim-left {
+            opacity: 0; transform: translateX(-30px);
+            transition: opacity 0.6s var(--transition-smooth), transform 0.6s var(--transition-smooth);
+        }
+        .anim-right {
+            opacity: 0; transform: translateX(30px);
+            transition: opacity 0.6s var(--transition-smooth), transform 0.6s var(--transition-smooth);
+        }
+        .anim-scale {
+            opacity: 0; transform: scale(0.9);
+            transition: opacity 0.6s var(--transition-smooth), transform 0.6s var(--transition-smooth);
+        }
+        .slide.active .anim,
+        .slide.active .anim-left,
+        .slide.active .anim-right,
+        .slide.active .anim-scale {
+            opacity: 1; transform: translateY(0) translateX(0) scale(1);
+        }
+        .slide.active .d1 { transition-delay: 0.15s; }
+        .slide.active .d2 { transition-delay: 0.3s; }
+        .slide.active .d3 { transition-delay: 0.45s; }
+        .slide.active .d4 { transition-delay: 0.6s; }
+        .slide.active .d5 { transition-delay: 0.75s; }
+        .slide.active .d6 { transition-delay: 0.9s; }
+
+        /* ===== COMMON ELEMENTS ===== */
+        h1 { font-family: 'Playfair Display', serif; font-weight: 700; line-height: 1.15; }
+        h2 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 2rem; margin-bottom: 0.6rem; }
+        h3 { font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem; }
+        .gold { color: var(--gold-400); }
+        .highlight-bg {
+            background: linear-gradient(135deg, var(--gold-500), var(--gold-300));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Shimmer divider */
+        .divider {
+            width: 60px; height: 3px; border-radius: 2px;
+            background: linear-gradient(90deg, var(--gold-500), var(--gold-300));
+            margin: 1.2rem auto;
+            position: relative; overflow: hidden;
+        }
+        .divider::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+            animation: shimmer 2.5s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .section-tag {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 3px;
+            text-transform: uppercase; color: var(--gold-400);
+            margin-bottom: 0.8rem;
+            background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.15);
+            padding: 6px 16px; border-radius: 30px;
+            animation: tagGlow 3s ease-in-out infinite alternate;
+        }
+        @keyframes tagGlow {
+            0% { box-shadow: 0 0 8px rgba(234,179,8,0); }
+            100% { box-shadow: 0 0 16px rgba(234,179,8,0.12); }
+        }
+
+        /* Glass card */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px; padding: 2rem;
+            transition: border-color 0.4s ease, transform 0.4s var(--transition-smooth), box-shadow 0.4s ease;
+        }
+        .glass:hover {
+            border-color: var(--glass-border-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(234,179,8,0.08);
+        }
+
+        /* Layout helpers */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+        .flex-row { display: flex; gap: 1.5rem; }
+
+        /* Metric card */
+        .metric-card { text-align: center; padding: 1.8rem 1.2rem; }
+        .metric-card .icon-wrap {
+            width: 56px; height: 56px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem; font-size: 1.4rem;
+            background: rgba(234,179,8,0.1); color: var(--gold-400);
+            transition: transform 0.3s var(--transition-smooth);
+        }
+        .metric-card:hover .icon-wrap { transform: scale(1.1) rotate(-5deg); }
+        .metric-card .value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem; font-weight: 800; color: var(--gold-300);
+        }
+        .metric-card .label {
+            font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1.5px; color: var(--text-muted); margin-top: 0.4rem;
+        }
+
+        /* Bullet list */
+        .bullet-list { list-style: none; }
+        .bullet-list li {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 0.8rem 0; color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: transform 0.3s ease, padding-left 0.3s ease;
+        }
+        .bullet-list li:hover { transform: translateX(4px); padding-left: 4px; }
+        .bullet-list li:last-child { border-bottom: none; }
+        .bullet-list li i { color: var(--gold-400); margin-top: 3px; flex-shrink: 0; }
+        .bullet-list li strong { color: var(--text-primary); }
+
+        /* Info box */
+        .info-box {
+            background: rgba(12,26,58,0.5); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px; padding: 1.5rem; margin-top: 1.5rem;
+        }
+        .info-box .label-text {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; color: var(--gold-400); margin-bottom: 0.4rem;
+        }
+        .info-box p { font-size: 0.88rem; color: var(--text-secondary); }
+
+        /* Big number with breathe */
+        .big-num {
+            font-family: 'Playfair Display', serif; font-size: 6rem; font-weight: 800;
+            color: var(--gold-400); line-height: 1;
+            animation: breathe 4s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { text-shadow: 0 0 30px rgba(234,179,8,0.15); }
+            50% { text-shadow: 0 0 60px rgba(234,179,8,0.35), 0 0 100px rgba(234,179,8,0.1); }
+        }
+
+        /* Pros / Cons */
+        .pros-card {
+            flex: 1; padding: 2rem; border-radius: 16px;
+            border: 1px solid rgba(74,222,128,0.2);
+            background: linear-gradient(135deg, var(--green-900), transparent);
+            transition: transform 0.35s ease, border-color 0.35s ease;
+        }
+        .pros-card:hover { transform: translateY(-3px); border-color: rgba(74,222,128,0.4); }
+        .cons-card {
+            flex: 1; padding: 2rem; border-radius: 16px;
+            border: 1px solid rgba(248,113,113,0.2);
+            background: linear-gradient(135deg, var(--red-900), transparent);
+            transition: transform 0.35s ease, border-color 0.35s ease;
+        }
+        .cons-card:hover { transform: translateY(-3px); border-color: rgba(248,113,113,0.4); }
+        .pros-card h4 { color: var(--green-400); font-size: 1.3rem; margin-bottom: 1rem; }
+        .cons-card h4 { color: var(--red-400); font-size: 1.3rem; margin-bottom: 1rem; }
+        .pros-card li, .cons-card li {
+            padding: 0.6rem 0; color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .pros-card li:last-child, .cons-card li:last-child { border-bottom: none; }
+        .pros-card strong, .cons-card strong { color: var(--text-primary); }
+
+        /* Risk row */
+        .risk-row {
+            display: flex; align-items: flex-start; gap: 1.2rem;
+            background: rgba(12,26,58,0.5); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px; padding: 1.5rem 1.8rem; margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .risk-row:hover {
+            border-color: rgba(255,255,255,0.12); transform: translateX(6px);
+        }
+        .risk-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
+            transition: transform 0.3s var(--transition-smooth);
+        }
+        .risk-row:hover .risk-icon { transform: scale(1.15); }
+
+        /* Chart container + glow ring */
+        .chart-box {
+            position: relative; height: 280px; width: 100%; max-width: 480px; margin: 0 auto;
+        }
+        .chart-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            border: 2px solid rgba(234,179,8,0.15);
+            animation: chartRingPulse 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes chartRingPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(234,179,8,0.05); opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { box-shadow: 0 0 40px rgba(234,179,8,0.15); opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        /* Plan/Sommaire items */
+        .plan-item {
+            display: flex; align-items: center; gap: 1.2rem;
+            padding: 1.2rem 1.5rem; border-radius: 14px;
+            background: rgba(12,26,58,0.4); border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.35s var(--transition-smooth);
+            cursor: pointer;
+        }
+        .plan-item:hover {
+            border-color: var(--glass-border-hover);
+            background: rgba(234,179,8,0.05);
+            transform: translateX(8px);
+        }
+        .plan-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem; font-weight: 800; color: var(--gold-400);
+            min-width: 48px;
+        }
+        .plan-item h4 { font-size: 1rem; margin-bottom: 2px; }
+        .plan-item p { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* ===== NAVIGATION BAR ===== */
+        #nav-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            height: 56px; z-index: 50;
+            background: rgba(6,13,31,0.88); backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 2rem;
+        }
+        #progress-track {
+            position: absolute; top: -2px; left: 0;
+            width: 100%; height: 2px;
+            background: rgba(255,255,255,0.06);
+        }
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-500), var(--gold-300));
+            transition: width 0.5s var(--transition-smooth);
+            border-radius: 0 2px 2px 0;
+            box-shadow: 0 0 8px rgba(234,179,8,0.4);
+        }
+        .nav-info {
+            font-size: 0.8rem; font-weight: 600;
+            letter-spacing: 3px; color: var(--text-muted);
+        }
+        .nav-info span.current { color: #fff; }
+
+        /* Fullscreen button */
+        .fs-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted); width: 36px; height: 36px;
+            border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.25s ease;
+        }
+        .fs-btn:hover { color: #fff; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
+
+        /* Dot indicators */
+        .slide-dots { display: flex; gap: 6px; align-items: center; }
+        .slide-dots .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: rgba(255,255,255,0.15); cursor: pointer;
+            transition: all 0.35s ease;
+        }
+        .slide-dots .dot.active {
+            background: var(--gold-400); width: 24px; border-radius: 4px;
+        }
+        .slide-dots .dot:hover { background: rgba(234,179,8,0.5); }
+
+        @media (max-width: 900px) {
+            .grid-2, .grid-3, .flex-row { grid-template-columns: 1fr; flex-direction: column; }
+            .slide { padding: 2rem 5%; }
+            h1 { font-size: 2.2rem !important; }
+            h2 { font-size: 1.6rem; }
+            .big-num { font-size: 4rem; }
+            .plan-grid { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Ambient Glow -->
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+
+<!-- Floating Money Background -->
+<div id="money-bg"></div>
+
+<!-- ===== PRESENTATION ===== -->
+<div id="presentation">
+
+    <!-- SLIDE 1: TITLE -->
+    <section class="slide active" data-index="0">
+        <div style="text-align:center; max-width:900px;" class="anim">
+            <div class="section-tag">
+                <i class="bi bi-bank2"></i> Macroéconomie — Projet Universitaire
+            </div>
+            <h1 style="font-size:3.8rem;" class="anim d1">
+                Le <span class="highlight-bg">dirham marocain</span> :<br>
+                fonctionnement et évolution<br>
+                du régime de change
+            </h1>
+            <div class="divider anim d2"></div>
+            <p style="font-size:1.1rem; color:var(--text-secondary); max-width:640px; margin:0 auto 2.5rem;" class="anim d2">
+                Une analyse approfondie de l'ancrage monétaire, de la flexibilisation progressive et des enjeux macroéconomiques pour le Royaume du Maroc.
+            </p>
+            <div style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap; font-size:0.85rem; color:var(--text-muted);" class="anim d3">
+                <span><i class="bi bi-calendar3 gold" style="margin-right:6px;"></i> 2026-2027</span>
+                <span><i class="bi bi-mortarboard gold" style="margin-right:6px;"></i> Sciences Éco. & Gestion</span>
+                <span><i class="bi bi-graph-up-arrow gold" style="margin-right:6px;"></i> Bank Al-Maghrib</span>
+            </div>
+            <p style="margin-top:1.8rem; font-size:0.85rem; color:var(--text-muted);" class="anim d4">
+                Présenté par : <span style="color:var(--text-secondary); font-weight:500;">Bilal Chellaoui · Kawtar Zimi · Ghizlane Elmahdaoui</span>
+            </p>
+            <p style="margin-top:0.6rem; font-size:0.8rem; color:var(--text-muted);" class="anim d5">
+                <i class="bi bi-person-workspace gold" style="margin-right:6px;"></i> Encadré par : <span style="color:var(--text-secondary);">Pr. Z. BELKHATAB</span>
+                &nbsp;·&nbsp;
+                <i class="bi bi-building gold" style="margin-right:6px;"></i> <span style="color:var(--text-secondary);">Faculté d'Économie et de Gestion - Safi</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- SLIDE 2: PLAN / SOMMAIRE -->
+    <section class="slide" data-index="1">
+        <div style="max-width:950px; width:100%;">
+            <div class="anim" style="text-align:center; margin-bottom:2rem;">
+                <div class="section-tag"><i class="bi bi-list-columns-reverse"></i> Sommaire</div>
+                <h2>Plan de la Présentation</h2>
+                <div class="divider"></div>
+            </div>
+            <div class="plan-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="plan-item anim d1" onclick="go(2)">
+                    <div class="plan-num">01</div>
+                    <div><h4>Cadre Conceptuel</h4><p>Définition & Autorité Monétaire</p></div>
+                </div>
+                <div class="plan-item anim d2" onclick="go(3)">
+                    <div class="plan-num">02</div>
+                    <div><h4>Panier de Devises</h4><p>Pondération Euro / Dollar</p></div>
+                </div>
+                <div class="plan-item anim d3" onclick="go(4)">
+                    <div class="plan-num">03</div>
+                    <div><h4>Mécanisme de Change</h4><p>Fonctionnement & bande de fluctuation</p></div>
+                </div>
+                <div class="plan-item anim-right d3" onclick="go(5)">
+                    <div class="plan-num">04</div>
+                    <div><h4>Avantages & Limites</h4><p>Analyse du régime fixe</p></div>
+                </div>
+                <div class="plan-item anim d4" onclick="go(6)">
+                    <div class="plan-num">05</div>
+                    <div><h4>Flexibilisation</h4><p>Phases 2018 & 2020</p></div>
+                </div>
+                <div class="plan-item anim-right d4" onclick="go(7)">
+                    <div class="plan-num">06</div>
+                    <div><h4>Bande de Fluctuation</h4><p>Évolution ± 0,3% → ± 5%</p></div>
+                </div>
+                <div class="plan-item anim d5" onclick="go(8)">
+                    <div class="plan-num">07</div>
+                    <div><h4>Risques & Défis</h4><p>Volatilité, réserves, spéculation</p></div>
+                </div>
+                <div class="plan-item anim-right d5" onclick="go(9)">
+                    <div class="plan-num">08</div>
+                    <div><h4>Perspectives</h4><p>Vers le ciblage d'inflation</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 3: CADRE CONCEPTUEL -->
+    <section class="slide" data-index="2">
+        <div style="max-width:1050px; width:100%;">
+            <div class="anim">
+                <div class="section-tag"><i class="bi bi-book"></i> Introduction</div>
+                <h2>Cadre Conceptuel</h2>
+                <h3 class="d1 anim">Définition & Autorité Monétaire</h3>
+            </div>
+            <div class="grid-2">
+                <div class="glass anim-left d2">
+                    <ul class="bullet-list">
+                        <li><i class="bi bi-arrow-right-circle-fill"></i> Le <strong>régime de change</strong> définit comment un pays gère la valeur de sa monnaie par rapport aux devises étrangères.</li>
+                        <li><i class="bi bi-arrow-right-circle-fill"></i> Au Maroc, <strong>Bank Al-Maghrib</strong> (BAM) est l'autorité monétaire responsable de la politique de change.</li>
+                        <li><i class="bi bi-arrow-right-circle-fill"></i> Le dirham est rattaché à un <strong>panier de devises</strong> composé de l'euro et du dollar américain.</li>
+                    </ul>
+                </div>
+                <div class="glass anim-right d3">
+                    <div class="info-box">
+                        <div class="label-text">Rôle de BAM</div>
+                        <p>Bank Al-Maghrib intervient sur le marché des changes pour maintenir la valeur du dirham dans une bande de fluctuation autour d'un cours central.</p>
+                    </div>
+                    <div class="info-box" style="margin-top:1rem;">
+                        <div class="label-text">Objectif Principal</div>
+                        <p>Assurer la stabilité des prix et contribuer à la stabilité financière du Royaume.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 4: PANIER DE DEVISES -->
+    <section class="slide" data-index="3">
+        <div style="max-width:1050px; width:100%;">
+            <div class="anim">
+                <div class="section-tag"><i class="bi bi-pie-chart-fill"></i> Structure</div>
+                <h2>Composition du Panier</h2>
+                <h3 class="anim d1">Pondération Euro / Dollar</h3>
+            </div>
+            <div class="grid-2">
+                <div class="glass anim-left d2">
+                    <ul class="bullet-list">
+                        <li><i class="bi bi-currency-euro"></i> <strong>Euro (60%)</strong> — Reflet des échanges commerciaux majeurs avec la zone euro.</li>
+                        <li><i class="bi bi-currency-dollar"></i> <strong>Dollar US (40%)</strong> — Importance stratégique pour les importations énergétiques.</li>
+                        <li><i class="bi bi-arrow-left-right"></i> BAM ajuste le <strong>cours central</strong> du dirham quotidiennement en fonction de ce panier.</li>
+                    </ul>
+                    <div class="info-box">
+                        <div class="label-text">Pourquoi ce ratio ?</div>
+                        <p>L'Europe est le premier partenaire commercial du Maroc (≈60% des échanges), tandis que le dollar domine les transactions pétrolières mondiales.</p>
+                    </div>
+                </div>
+                <div class="anim-scale d3 chart-box">
+                    <div class="chart-glow"></div>
+                    <canvas id="chart-basket"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 5: MÉCANISME DE CHANGE -->
+    <section class="slide" data-index="4">
+        <div style="max-width:1050px; width:100%;">
+            <div class="anim">
+                <div class="section-tag"><i class="bi bi-gear-fill"></i> Mécanisme</div>
+                <h2>Comment fonctionne le change ?</h2>
+            </div>
+            <div class="grid-3">
+                <div class="glass metric-card anim d1">
+                    <div class="icon-wrap"><i class="bi bi-calculator"></i></div>
+                    <div class="value">60/40</div>
+                    <div class="label">Ratio EUR/USD</div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.6rem;">Pondération du panier de référence</p>
+                </div>
+                <div class="glass metric-card anim-scale d2">
+                    <div class="icon-wrap"><i class="bi bi-bullseye"></i></div>
+                    <div class="value">Central</div>
+                    <div class="label">Cours de référence</div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.6rem;">Fixé quotidiennement par BAM</p>
+                </div>
+                <div class="glass metric-card anim d3">
+                    <div class="icon-wrap"><i class="bi bi-shield-check"></i></div>
+                    <div class="value">± 5%</div>
+                    <div class="label">Bande actuelle</div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.6rem;">Marge de fluctuation autorisée</p>
+                </div>
+            </div>
+            <div class="glass anim d4" style="margin-top:1.5rem; text-align:center;">
+                <p style="color:var(--text-secondary);"><i class="bi bi-info-circle gold" style="margin-right:8px;"></i>BAM intervient lorsque le dirham s'approche des limites de la bande pour stabiliser le marché.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 6: AVANTAGES & LIMITES -->
+    <section class="slide" data-index="5">
+        <div style="max-width:1050px; width:100%;">
+            <div class="anim">
+                <div class="section-tag"><i class="bi bi-balance-scale"></i> Analyse</div>
+                <h2>Avantages & Limites du Régime Fixe</h2>
+            </div>
+            <div class="flex-row">
+                <div class="pros-card anim-left d1">
+                    <h4><i class="bi bi-check-circle-fill" style="margin-right:8px;"></i> Avantages</h4>
+                    <ul style="list-style:none;">
+                        <li><strong>Stabilité :</strong> Protège les entreprises importatrices/exportatrices de la volatilité.</li>
+                        <li><strong>Confiance :</strong> Ancrage fort qui attire les investisseurs étrangers.</li>
+                        <li><strong>Maîtrise de l'inflation :</strong> Limite les pressions inflationnistes importées.</li>
+                    </ul>
+                </div>
+                <div class="cons-card anim-right d2">
+                    <h4><i class="bi bi-exclamation-triangle-fill" style="margin-right:8px;"></i> Limites</h4>
+                    <ul style="list-style:none;">
+                        <li><strong>Rigidité :</strong> Incapacité à absorber les chocs externes (ex: flambée du pétrole).</li>
+                        <li><strong>Réserves sous pression :</strong> Nécessité de puiser dans les réserves pour défendre la parité.</li>
+                        <li><strong>Perte de compétitivité :</strong> Déconnexion possible avec les fondamentaux réels.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 7: PHASE 1 — 2018 -->
+    <section class="slide" data-index="6">
+        <div style="max-width:800px; width:100%; text-align:center;">
+            <div class="anim">
+                <div class="section-tag"><i class="bi bi-unlock-fill"></i> Partie II — Évolution</div>
+                <h2>Le Lancement de la Flexibilisation</h2>
+            </div>
+            <div class="anim d1" style="margin:1.5rem 0;">
+                <span style="display:inline-block; background:var(--gold-500); color:var(--bg-deep); font-weight:700; padding:6px 20px; border-radius:8px; font-size:0.9rem;">Phase 1 — 15 Janvier 2018</span>
+            </div>
+            <div class="glass anim-scale d2" style="padding:3rem 2rem;">
+                <p style="font-size:1.1rem; color:var(--text-secondary); margin-bottom:1.5rem;">Élargissement de la bande de fluctuation</p>
+                <div class="big-num">± 2,5%</div>
+                <p style="color:var(--text-muted); margin-top:1rem;">(Contre ± 0,3% auparavant — ×8 la marge)</p>
+            </div>
+            <div class="glass anim d3" style="margin-top:1.5rem;">
+                <p style="color:var(--text-secondary);"><i class="bi bi-lightbulb-fill gold" style="margin-right:8px;"></i>Cette réforme graduelle permet au marché de s'adapter progressivement, sans choc brutal.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 8: PHASE 2 — 2020 + Chart -->
+    <section class="slide" data-index="7">
+        <div style="max-width:950px; width:100%;">
+            <div class="anim">
+                <div class="section-tag"><i class="bi bi-graph-up"></i> Partie II — Évolution</div>
+                <h2>Élargissement de la Bande</h2>
+            </div>
+            <div class="grid-2">
+                <div style="text-align:center;" class="anim-left d1">
+                    <div style="margin-bottom:1.5rem;">
+                        <span style="display:inline-block; background:var(--gold-500); color:var(--bg-deep); font-weight:700; padding:6px 20px; border-radius:8px; font-size:0.9rem;">Phase 2 — 6 Mars 2020</span>
+                    </div>
+                    <div class="glass" style="padding:3rem 2rem;">
+                        <p style="font-size:1.1rem; color:var(--text-secondary); margin-bottom:1.5rem;">Nouvelle marge de fluctuation</p>
+                        <div class="big-num">± 5%</div>
+                        <p style="color:var(--text-muted); margin-top:1rem;">(Doublement de la bande précédente)</p>
+                    </div>
+                </div>
+                <div class="anim-right d2">
+                    <div class="chart-box">
+                        <canvas id="chart-band"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 9: RISQUES & DÉFIS -->
+    <section class="slide" data-index="8">
+        <div style="max-width:950px; width:100%;">
+            <div class="anim">
+                <div class="section-tag"><i class="bi bi-shield-exclamation"></i> Analyse</div>
+                <h2>Risques & Défis de la Flexibilisation</h2>
+            </div>
+            <div class="anim d1">
+                <div class="risk-row anim-left d1">
+                    <div class="risk-icon" style="background:rgba(248,113,113,0.15); color:var(--red-400);"><i class="bi bi-graph-down-arrow"></i></div>
+                    <div>
+                        <h4 style="margin-bottom:0.3rem;">Volatilité accrue</h4>
+                        <p style="color:var(--text-secondary); font-size:0.9rem;">Les fluctuations plus larges peuvent créer de l'incertitude pour les opérateurs économiques.</p>
+                    </div>
+                </div>
+                <div class="risk-row anim-right d2">
+                    <div class="risk-icon" style="background:rgba(251,191,36,0.15); color:var(--gold-400);"><i class="bi bi-bank"></i></div>
+                    <div>
+                        <h4 style="margin-bottom:0.3rem;">Pression sur les réserves de change</h4>
+                        <p style="color:var(--text-secondary); font-size:0.9rem;">BAM doit disposer de réserves suffisantes pour intervenir en cas de mouvements excessifs.</p>
+                    </div>
+                </div>
+                <div class="risk-row anim-left d3">
+                    <div class="risk-icon" style="background:rgba(59,130,246,0.15); color:var(--blue-500);"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <h4 style="margin-bottom:0.3rem;">Maturité du marché</h4>
+                        <p style="color:var(--text-secondary); font-size:0.9rem;">Les entreprises et banques doivent développer leurs capacités de gestion du risque de change.</p>
+                    </div>
+                </div>
+                <div class="risk-row anim-right d4">
+                    <div class="risk-icon" style="background:rgba(74,222,128,0.15); color:var(--green-400);"><i class="bi bi-arrow-repeat"></i></div>
+                    <div>
+                        <h4 style="margin-bottom:0.3rem;">Spéculation</h4>
+                        <p style="color:var(--text-secondary); font-size:0.9rem;">Un marché plus libre peut attirer des flux spéculatifs déstabilisateurs.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 10: PERSPECTIVES -->
+    <section class="slide" data-index="9">
+        <div style="max-width:1050px; width:100%;">
+            <div class="anim">
+                <div class="section-tag"><i class="bi bi-binoculars-fill"></i> Perspectives</div>
+                <h2>Vers Quel Avenir ?</h2>
+            </div>
+            <div class="grid-3">
+                <div class="glass anim-left d1" style="text-align:center;">
+                    <div style="font-size:2.5rem; margin-bottom:1rem;">📊</div>
+                    <h4 style="margin-bottom:0.6rem;">Phase 3</h4>
+                    <p style="color:var(--text-secondary); font-size:0.88rem;">Élargissement potentiel à ±10% prévu par le FMI dans les prochaines années.</p>
+                </div>
+                <div class="glass anim-scale d2" style="text-align:center;">
+                    <div style="font-size:2.5rem; margin-bottom:1rem;">🎯</div>
+                    <h4 style="margin-bottom:0.6rem;">Ciblage d'Inflation</h4>
+                    <p style="color:var(--text-secondary); font-size:0.88rem;">Transition vers un cadre de politique monétaire basé sur le ciblage de l'inflation.</p>
+                </div>
+                <div class="glass anim-right d3" style="text-align:center;">
+                    <div style="font-size:2.5rem; margin-bottom:1rem;">🌍</div>
+                    <h4 style="margin-bottom:0.6rem;">Flottement Libre</h4>
+                    <p style="color:var(--text-secondary); font-size:0.88rem;">Objectif final : un dirham entièrement déterminé par le marché, selon le FMI.</p>
+                </div>
+            </div>
+            <div class="glass anim d4" style="margin-top:1.5rem; text-align:center;">
+                <p style="color:var(--text-secondary);"><i class="bi bi-info-circle gold" style="margin-right:8px;"></i>La réussite dépend de la <strong>discipline budgétaire</strong>, de la <strong>profondeur du marché financier</strong> et de la <strong>stabilité macroéconomique</strong>.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 11: CONCLUSION -->
+    <section class="slide" data-index="10">
+        <div style="max-width:800px; width:100%; text-align:center;">
+            <div class="anim">
+                <div class="section-tag"><i class="bi bi-flag-fill"></i> Conclusion</div>
+                <h2 class="anim d1">
+                    Le Maroc s'engage résolument vers<br>
+                    le <span class="highlight-bg">ciblage de l'inflation</span> (Inflation Targeting).
+                </h2>
+                <div class="divider anim d2"></div>
+                <h1 style="font-size:3.5rem; margin-top:1rem;" class="anim d3">Merci de votre attention.</h1>
+                <p class="gold anim d4" style="font-size:1.2rem; margin-top:1rem;">Place aux questions.</p>
+                <p style="margin-top:2.5rem; font-size:0.8rem; color:var(--text-muted);" class="anim d5">
+                    Bilal Chellaoui · Kawtar Zimi · Ghizlane Elmahdaoui
+                </p>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- ===== NAVIGATION ===== -->
+<nav id="nav-bar">
+    <div id="progress-track"><div id="progress-fill" style="width:9%;"></div></div>
+    <div class="slide-dots" id="slide-dots"></div>
+    <div class="nav-info"><span class="current" id="slide-num">1</span> / <span id="slide-total">11</span></div>
+    <button class="fs-btn" onclick="toggleFullscreen()" title="Plein écran (F)"><i class="bi bi-arrows-fullscreen"></i></button>
+</nav>
+
+<script>
+// ===== FLOATING MONEY BACKGROUND =====
+(function createMoneyBg() {
+    const container = document.getElementById('money-bg');
+    const icons = [
+        'bi-coin', 'bi-cash-coin', 'bi-cash-stack',
+        'bi-currency-dollar', 'bi-currency-euro', 'bi-currency-pound', 'bi-currency-yen',
+        'bi-currency-exchange', 'bi-bank', 'bi-bank2',
+        'bi-wallet2', 'bi-credit-card-2-front', 'bi-graph-up-arrow',
+        'bi-bar-chart-line', 'bi-piggy-bank', 'bi-safe',
+        'bi-briefcase', 'bi-building', 'bi-gem', 'bi-shield-check'
+    ];
+    const count = 40;
+    for (let i = 0; i < count; i++) {
+        const el = document.createElement('span');
+        el.className = 'money-item';
+        el.innerHTML = '<i class="bi ' + icons[Math.floor(Math.random() * icons.length)] + '"></i>';
+        el.style.left = Math.random() * 100 + '%';
+        el.style.fontSize = (1.2 + Math.random() * 1.8) + 'rem';
+        el.style.animationDuration = (16 + Math.random() * 24) + 's';
+        el.style.animationDelay = -(Math.random() * 35) + 's';
+        el.style.setProperty('--drift', ((Math.random() - 0.5) * 120) + 'px');
+        container.appendChild(el);
+    }
+})();
+
+// ===== SLIDE NAVIGATION =====
+let cur = 0;
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+const numEl = document.getElementById('slide-num');
+const totalEl = document.getElementById('slide-total');
+const progressEl = document.getElementById('progress-fill');
+const dotsContainer = document.getElementById('slide-dots');
+
+totalEl.textContent = total;
+
+// Create dots
+for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => go(i));
+    dotsContainer.appendChild(dot);
+}
+
+function go(i) {
+    if (i < 0 || i >= total || i === cur) return;
+    const direction = i > cur ? 'down' : 'up';
+
+    // Exit current slide
+    slides[cur].classList.remove('active');
+    if (direction === 'down') slides[cur].classList.add('exit-up');
+    document.querySelectorAll('.slide-dots .dot')[cur].classList.remove('active');
+
+    // Clean up exit class after transition
+    const prevSlide = slides[cur];
+    setTimeout(() => prevSlide.classList.remove('exit-up'), 700);
+
+    cur = i;
+
+    // Enter new slide
+    slides[cur].classList.add('active');
+    document.querySelectorAll('.slide-dots .dot')[cur].classList.add('active');
+    numEl.textContent = cur + 1;
+    progressEl.style.width = ((cur + 1) / total * 100) + '%';
+
+    // Lazy-init charts
+    if (cur === 3) initBasketChart();
+    if (cur === 7) initBandChart();
+}
+function next() { go(cur + 1); }
+function prev() { go(cur - 1); }
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+    else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); }
+});
+
+// Touch / swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(dx) > 50) { dx < 0 ? next() : prev(); }
+}, { passive: true });
+
+// Mouse wheel
+let wheelTimeout = null;
+document.addEventListener('wheel', e => {
+    if (wheelTimeout) return;
+    wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 800);
+    if (e.deltaY > 30) next();
+    else if (e.deltaY < -30) prev();
+}, { passive: true });
+
+// Fullscreen
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+        document.exitFullscreen().catch(() => {});
+    }
+}
+
+// ===== CHARTS =====
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+let basketChart = null;
+let basketRotation = 0;
+let basketProgress = 0; // 0 to 1
+let basketStartTime = 0;
+const BASKET_ANIM_DURATION = 2500; // 2.5 seconds
+
+function initBasketChart() {
+    if (basketChart) return;
+    const canvas = document.getElementById('chart-basket');
+    const ctx = canvas.getContext('2d');
+
+    const euroGrad = ctx.createLinearGradient(0, 0, 0, 300);
+    euroGrad.addColorStop(0, 'rgba(96, 165, 250, 1)');
+    euroGrad.addColorStop(1, 'rgba(29, 78, 216, 0.75)');
+
+    const usdGrad = ctx.createLinearGradient(0, 0, 0, 300);
+    usdGrad.addColorStop(0, 'rgba(253, 224, 71, 1)');
+    usdGrad.addColorStop(1, 'rgba(202, 138, 4, 0.75)');
+
+    // Start from zero!
+    basketChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Euro (60%)', 'Dollar US (40%)'],
+            datasets: [{
+                data: [0.01, 0.01],
+                backgroundColor: [euroGrad, usdGrad],
+                borderColor: ['rgba(96,165,250,0.4)', 'rgba(253,224,71,0.4)'],
+                borderWidth: 2,
+                hoverOffset: 20,
+                hoverBorderWidth: 3,
+                hoverBorderColor: ['rgba(255,255,255,0.7)', 'rgba(255,255,255,0.7)'],
+                spacing: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            rotation: -90,
+            circumference: 0,
+            animation: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 20, usePointStyle: true, pointStyleWidth: 12, font: { size: 13, weight: '500' } }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(6,13,31,0.95)',
+                    titleColor: '#facc15', bodyColor: '#f1f5f9',
+                    borderColor: 'rgba(234,179,8,0.3)', borderWidth: 1,
+                    cornerRadius: 12, padding: 16,
+                    titleFont: { size: 14, weight: '600' },
+                    bodyFont: { size: 13 },
+                    displayColors: true,
+                    boxPadding: 6,
+                }
+            }
+        },
+        plugins: [{
+            id: 'outerGlow',
+            beforeDraw(chart) {
+                const { ctx, chartArea } = chart;
+                if (!chartArea) return;
+                const cx = (chartArea.left + chartArea.right) / 2;
+                const cy = (chartArea.top + chartArea.bottom) / 2;
+                const r = Math.min(chartArea.right - chartArea.left, chartArea.bottom - chartArea.top) / 2;
+                const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 1200);
+                
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, r + 6, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(234, 179, 8, ' + (0.08 + pulse * 0.12) + ')';
+                ctx.lineWidth = 3;
+                ctx.shadowColor = 'rgba(234, 179, 8, ' + (0.1 + pulse * 0.2) + ')';
+                ctx.shadowBlur = 20 + pulse * 20;
+                ctx.stroke();
+                ctx.restore();
+            }
+        },
+        {
+            id: 'centerText',
+            afterDraw(chart) {
+                const { ctx, chartArea } = chart;
+                if (!chartArea) return;
+                const cx = (chartArea.left + chartArea.right) / 2;
+                const cy = (chartArea.top + chartArea.bottom) / 2;
+                const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 800);
+                
+                // Show counting percentage during animation
+                const pct = Math.round(basketProgress * 100);
+
+                ctx.save();
+                ctx.shadowColor = 'rgba(234, 179, 8, ' + (0.15 + pulse * 0.35) + ')';
+                ctx.shadowBlur = 12 + pulse * 18;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                if (basketProgress < 1) {
+                    // During animation: show counting %
+                    ctx.font = "bold 2.2em 'Playfair Display'";
+                    ctx.fillStyle = '#facc15';
+                    ctx.fillText(pct + '%', cx, cy - 4);
+                } else {
+                    // After animation: show Panier label
+                    ctx.font = "bold 1.5em 'Playfair Display'";
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText('Panier', cx, cy - 10);
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.font = "500 0.72em 'Inter'";
+                    ctx.fillStyle = 'rgba(148, 163, 184, ' + (0.7 + pulse * 0.3) + ')';
+                    ctx.fillText('EUR / USD', cx, cy + 14);
+                }
+                ctx.restore();
+            }
+        }]
+    });
+
+    // Animate from 0 to full
+    basketStartTime = performance.now();
+    basketProgress = 0;
+    
+    function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+    
+    function animateBasket(time) {
+        if (!basketChart) return;
+        
+        const elapsed = time - basketStartTime;
+        const rawProgress = Math.min(elapsed / BASKET_ANIM_DURATION, 1);
+        basketProgress = easeOutQuart(rawProgress);
+        
+        // Animate circumference from 0 to 360
+        basketChart.options.circumference = basketProgress * 360;
+        
+        // Animate data from 0 to final
+        basketChart.data.datasets[0].data = [
+            basketProgress * 60,
+            basketProgress * 40
+        ];
+        
+        // Slow idle rotation after animation completes
+        if (basketProgress >= 1) {
+            basketRotation += 0.05;
+            basketChart.options.rotation = -90 + basketRotation;
+        }
+        
+        basketChart.update('none');
+        requestAnimationFrame(animateBasket);
+    }
+    requestAnimationFrame(animateBasket);
+}
+
+let bandChart = null;
+let bandProgress = 0;
+let bandStartTime = 0;
+const BAND_ANIM_DURATION = 2200;
+const BAND_TARGETS = [0.3, 2.5, 5.0];
+const BAND_STAGGER = 500; // ms delay between each bar
+
+function initBandChart() {
+    if (bandChart) return;
+    const ctx = document.getElementById('chart-band').getContext('2d');
+    
+    bandChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Avant 2018', 'Janvier 2018', 'Mars 2020'],
+            datasets: [{
+                label: 'Marge de fluctuation (%)',
+                data: [0, 0, 0],
+                backgroundColor: function(context) {
+                    const chart = context.chart;
+                    const { ctx: c, chartArea } = chart;
+                    if (!chartArea) return null;
+                    const gradient = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                    gradient.addColorStop(0, 'rgba(234, 179, 8, 0.15)');
+                    gradient.addColorStop(0.5, 'rgba(234, 179, 8, 0.7)');
+                    gradient.addColorStop(1, 'rgba(253, 224, 71, 1)');
+                    return gradient;
+                },
+                borderRadius: 10,
+                borderWidth: 0,
+                barPercentage: 0.6,
+                categoryPercentage: 0.7,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 6,
+                    grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+                    ticks: { 
+                        stepSize: 1,
+                        callback: function(val) { return val + '%'; }
+                    },
+                    title: { display: true, text: 'Pourcentage (%)', font: { size: 12 }, padding: 10 }
+                },
+                x: { 
+                    grid: { display: false, drawBorder: false },
+                    ticks: { font: { size: 12, weight: '600' } }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(6,13,31,0.95)',
+                    titleColor: '#facc15', bodyColor: '#f1f5f9',
+                    borderColor: 'rgba(234,179,8,0.3)', borderWidth: 1,
+                    cornerRadius: 12, padding: 14,
+                    callbacks: { label: function(context) { return ' Marge: ±' + context.parsed.y + '%'; } }
+                }
+            }
+        },
+        plugins: [{
+            id: 'floatingLabels',
+            afterDraw(chart) {
+                const { ctx, data } = chart;
+                const dataset = data.datasets[0];
+                const meta = chart.getDatasetMeta(0);
+                
+                ctx.save();
+                meta.data.forEach((bar, i) => {
+                    const val = dataset.data[i];
+                    if (val < 0.05) return; // Don't show label for near-zero
+                    const x = bar.x;
+                    const y = bar.y - 14;
+                    
+                    const displayVal = (val >= BAND_TARGETS[i] - 0.01) 
+                        ? '±' + BAND_TARGETS[i] + '%'
+                        : '±' + val.toFixed(1) + '%';
+                    ctx.font = "bold 0.8em 'Inter'";
+                    const textWidth = ctx.measureText(displayVal).width;
+                    
+                    const px = 8, py = 4, r = 6;
+                    ctx.fillStyle = 'rgba(234, 179, 8, 0.15)';
+                    ctx.beginPath();
+                    ctx.roundRect(x - textWidth/2 - px, y - 10 - py, textWidth + px*2, 20 + py*2, r);
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(234, 179, 8, 0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#fde047';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(displayVal, x, y);
+                });
+                ctx.restore();
+            }
+        },
+        {
+            id: 'barGlow',
+            beforeDraw(chart) {
+                const { ctx } = chart;
+                const meta = chart.getDatasetMeta(0);
+                if (!meta.data.length) return;
+                
+                ctx.save();
+                meta.data.forEach((bar) => {
+                    if (bar.y >= bar.base) return;
+                    ctx.shadowColor = 'rgba(234, 179, 8, 0.2)';
+                    ctx.shadowBlur = 15;
+                    ctx.fillStyle = 'rgba(234, 179, 8, 0.03)';
+                    ctx.fillRect(bar.x - bar.width/2 - 4, bar.y, bar.width + 8, bar.base - bar.y);
+                });
+                ctx.restore();
+            }
+        }]
+    });
+
+    // Animate bars growing from 0 with stagger
+    bandStartTime = performance.now();
+    
+    function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+    
+    function animateBars(time) {
+        if (!bandChart) return;
+        const elapsed = time - bandStartTime;
+        let allDone = true;
+        
+        for (let i = 0; i < 3; i++) {
+            const barElapsed = elapsed - (i * BAND_STAGGER);
+            if (barElapsed < 0) {
+                bandChart.data.datasets[0].data[i] = 0;
+                allDone = false;
+            } else {
+                const rawP = Math.min(barElapsed / BAND_ANIM_DURATION, 1);
+                const p = easeOutQuart(rawP);
+                bandChart.data.datasets[0].data[i] = p * BAND_TARGETS[i];
+                if (rawP < 1) allDone = false;
+            }
+        }
+        
+        bandChart.update('none');
+        if (!allDone) requestAnimationFrame(animateBars);
+    }
+    requestAnimationFrame(animateBars);
+}
+</script>
+</body>
+</html>
